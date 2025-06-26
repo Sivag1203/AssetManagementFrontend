@@ -3,14 +3,13 @@ import { useState, useEffect } from "react";
 import EditEmployeeProfile from "./EditEmployeeProfile";
 import axios from "axios";
 
-function EmployeeProfile(){
+function EmployeeProfile() {
   const user = useSelector((state) => state.user);
   const token = localStorage.getItem("token");
 
   const [editMode, setEditMode] = useState(false);
   const [profilePic, setProfilePic] = useState("");
   const [msg, setMsg] = useState("");
-
   useEffect(() => {
     getProfilePic();
   }, []);
@@ -34,11 +33,15 @@ function EmployeeProfile(){
     formData.append("file", file);
 
     try {
-      await axios.post("http://localhost:8080/api/profile-pic/upload", formData, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
+      await axios.post(
+        "http://localhost:8080/api/profile-pic/upload",
+        formData,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
       setMsg("Profile image uploaded...");
       getProfilePic();
     } catch (err) {
@@ -79,13 +82,54 @@ function EmployeeProfile(){
           />
         ) : (
           <>
-            <InfoField label="Name" value={user.name} />
-            <InfoField label="Email" value={user.email} />
-            <InfoField label="Phone" value={user.phone} />
-            <InfoField label="Department" value={user.department} />
-            <InfoField label="Address" value={user.address} />
-            <InfoField label="Login Email" value={user.email} />
-            <InfoField label="Role" value={user.role} />
+            <div className="mb-3">
+              <label className="form-label">Name</label>
+              <div className="border rounded px-3 py-2 bg-light">
+                {user.name}
+              </div>
+            </div>
+
+            <div className="mb-3">
+              <label className="form-label">Email</label>
+              <div className="border rounded px-3 py-2 bg-light">
+                {user.email}
+              </div>
+            </div>
+
+            <div className="mb-3">
+              <label className="form-label">Phone</label>
+              <div className="border rounded px-3 py-2 bg-light">
+                {user.phone}
+              </div>
+            </div>
+
+            <div className="mb-3">
+              <label className="form-label">Department</label>
+              <div className="border rounded px-3 py-2 bg-light">
+                {user.department}
+              </div>
+            </div>
+
+            <div className="mb-3">
+              <label className="form-label">Address</label>
+              <div className="border rounded px-3 py-2 bg-light">
+                {user.address}
+              </div>
+            </div>
+
+            <div className="mb-3">
+              <label className="form-label">Login Email</label>
+              <div className="border rounded px-3 py-2 bg-light">
+                {user.email}
+              </div>
+            </div>
+
+            <div className="mb-3">
+              <label className="form-label">Role</label>
+              <div className="border rounded px-3 py-2 bg-light">
+                {user.role}
+              </div>
+            </div>
 
             <div className="d-flex justify-content-end mt-4">
               <button
@@ -103,13 +147,4 @@ function EmployeeProfile(){
   );
 }
 
-function InfoField({ label, value }) {
-  return (
-    <div className="mb-3">
-      <label className="form-label">{label}</label>
-      <div className="border rounded px-3 py-2 bg-light">{value}</div>
-    </div>
-  );
-}
-
-export default EmployeeProfile; 
+export default EmployeeProfile;

@@ -1,132 +1,102 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
 
+const token = localStorage.getItem("token");
+const auth = { headers: { Authorization: `Bearer ${token}` } };
+
 function AllAssets() {
-  const [assets, setAssets] = useState([]);
-  const [employee, setEmployee] = useState(null);
-  const [assignedAssets, setAssignedAssets] = useState([]);
-  const token = localStorage.getItem("token");
-
-  const fetchEligibleAssets = async () => {
-    try {
-      const res = await axios.get("http://localhost:8080/api/assets/eligible", {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      setAssets(res.data);
-    } catch (err) {
-      console.error("Failed to fetch eligible assets", err);
-    }
-  };
-
-  const fetchEmployeeDetails = async () => {
-    try {
-      const res = await axios.get("http://localhost:8080/api/employee/details", {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      setEmployee(res.data);
-      fetchAssignedAssets(res.data.id); // fetch assigned assets after employee is fetched
-    } catch (err) {
-      console.error("Failed to fetch employee details", err);
-    }
-  };
-
-  const fetchAssignedAssets = async (employeeId) => {
-    try {
-      const res = await axios.get(
-        `http://localhost:8080/api/assigned-assets/employee/${employeeId}`,
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        }
-      );
-      setAssignedAssets(res.data);
-    } catch (err) {
-      console.error("Failed to fetch assigned assets", err);
-    }
-  };
-
-  const handleRequest = async (asset) => {
-    if (!employee) return alert("Employee data not loaded!");
-
-    const alreadyAssigned = assignedAssets.some(
-      (assigned) => assigned.asset.id === asset.id
-    );
-
-    if (alreadyAssigned) {
-      alert("You already have this asset assigned.");
-      return;
-    }
-
-    const requestPayload = {
-      asset: asset,
-      employee: employee,
-    };
-
-    try {
-      await axios.post("http://localhost:8080/api/asset-requests/create", requestPayload, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
-        },
-      });
-      alert("Asset request submitted successfully!");
-    } catch (err) {
-      console.error("Failed to create asset request", err);
-      alert("Failed to create request");
-    }
-  };
+  const [eligible, setEligible] = useState([]);     
+  const [assigned, setAssigned] = useState([]);     
+  const [employee, setEmployee] = useState(null);   
 
   useEffect(() => {
-    fetchEligibleAssets();
-    fetchEmployeeDetails();
+    (async () => {
+      try {
+        const { data: emp } = await axios.get(
+          "http://localhost:8080/api/employee/details",
+          auth
+        );
+        setEmployee(emp);
+
+        const [el, as] = await Promise.all([
+          axios.get("http://localhost:8080/api/assets/eligible", auth),
+          axios.get(
+            `http://localhost:8080/api/assigned-assets/employee/${emp.id}`,
+            auth
+          ),
+        ]);
+
+        setEligible(el.data);
+        setAssigned(as.data);
+      } catch (err) {
+        console.error("Data load failed", err);
+      }
+    })();
   }, []);
+
+
+  const hasAsset = (assetId) =>
+    assigned.some((a) => a.asset.id === assetId);
+
+  const requestAsset = async (asset) => {
+    if (!employee) return;
+
+    if (hasAsset(asset.id)) {
+      return alert("You already have this asset.");
+    }
+
+    try {
+      await axios.post(
+        "http://localhost:8080/api/asset-requests/create",
+        { asset, employee },
+        auth
+      );
+      alert("Request sent ✔️");
+    } catch (err) {
+      console.error("Request failed", err);
+      alert("Could not send request");
+    }
+  };
 
   return (
     <div className="container py-5">
-      <h2 className="fw-bold mb-4 text-center" style={{ color: "#005DAA" }}>
+      <h2 className="fw-bold text-center mb-4" style={{ color: "#005DAA" }}>
         Eligible Assets
       </h2>
+
       <div className="row g-4">
-        {assets.length === 0 ? (
+        {eligible.length === 0 && (
           <p className="text-center text-muted">No eligible assets found.</p>
-        ) : (
-          assets.map((asset) => {
-            const alreadyAssigned = assignedAssets.some(
-              (assigned) => assigned.asset.id === asset.id
-            );
-
-            return (
-              <div className="col-md-4" key={asset.id}>
-                <div
-                  className="shadow rounded-4 p-4 h-100"
-                  style={{
-                    backgroundColor: "#fff",
-                    borderLeft: "5px solid #005DAA",
-                  }}
-                >
-                  <h5 className="fw-bold mb-2" style={{ color: "#005DAA" }}>
-                    {asset.serialNumber}
-                  </h5>
-                  <p className="text-muted mb-1" style={{ fontSize: "0.95rem" }}>
-                    {asset.specs}
-                  </p>
-                  <p className="mb-1">
-                    <strong>Eligibility Level:</strong> {asset.eligibilityLevel}
-                  </p>
-
-                  <div className="d-flex justify-content-end mt-3">
-                    <button
-                      className="btn btn-outline-primary rounded-pill"
-                      onClick={() => handleRequest(asset)}
-                      disabled={alreadyAssigned}
-                    >
-                      {alreadyAssigned ? "Already Assigned" : "Request Asset"}
-                    </button>
-                  </div>
-                </div>
-              </div>
-            );
-          })
         )}
+
+        {eligible.map((a) => (
+          <div key={a.id} className="col-md-4">
+            <div
+              className="shadow rounded-4 p-4 h-100"
+              style={{ background: "#fff", borderLeft: "5px solid #005DAA" }}
+            >
+              <h5 className="fw-bold mb-2" style={{ color: "#005DAA" }}>
+                {a.serialNumber}
+              </h5>
+
+              <p className="text-muted mb-1" style={{ fontSize: "0.95rem" }}>
+                {a.specs}
+              </p>
+
+              <p className="mb-1">
+                <strong>Eligibility:</strong> {a.eligibilityLevel}
+              </p>
+
+              <button
+                className="btn btn-outline-primary rounded-pill mt-3"
+                disabled={hasAsset(a.id)}
+                onClick={() => requestAsset(a)}
+              >
+                {hasAsset(a.id) ? "Already Assigned" : "Request Asset"}
+              </button>
+            </div>
+          </div>
+        ))}
       </div>
     </div>
   );

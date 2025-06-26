@@ -11,14 +11,6 @@ function Assets() {
   const [showModal, setShowModal] = useState(false);
   const [showCategoryModal, setShowCategoryModal] = useState(false);
   const [editModalOpen, setEditModalOpen] = useState(false);
-
-  const [formData, setFormData] = useState({
-    serialNumber: "",
-    specs: "",
-    eligibilityLevel: "",
-    categoryId: "",
-  });
-
   const [newCategoryName, setNewCategoryName] = useState("");
   const [editAsset, setEditAsset] = useState(null);
   const token = localStorage.getItem("token");
@@ -40,29 +32,31 @@ function Assets() {
 
   const fetchCategories = async () => {
     try {
-      const response = await axios.get("http://localhost:8080/api/asset-category/all", {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      const response = await axios.get(
+        "http://localhost:8080/api/asset-category/all",
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
       setCategories(response.data);
     } catch (error) {
       console.error("Error fetching categories:", error);
     }
   };
 
-  const handleAddAsset = async () => {
+  const handleAddAsset = async (newAsset) => {
     try {
       await axios.post(
-        `http://localhost:8080/api/assets/add/${formData.categoryId}`,
+        `http://localhost:8080/api/assets/add/${newAsset.categoryId}`,
         {
-          serialNumber: formData.serialNumber,
-          specs: formData.specs,
-          eligibilityLevel: formData.eligibilityLevel,
+          serialNumber: newAsset.serialNumber,
+          specs: newAsset.specs,
+          eligibilityLevel: newAsset.eligibilityLevel,
         },
         {
           headers: { Authorization: `Bearer ${token}` },
         }
       );
-      setFormData({ serialNumber: "", specs: "", eligibilityLevel: "", categoryId: "" });
       setShowModal(false);
       fetchAssets();
     } catch (error) {
@@ -99,11 +93,15 @@ function Assets() {
     }
   };
 
-  const handleUpdateAsset = async () => {
+  const handleUpdateAsset = async (updatedAsset) => {
     try {
-      await axios.put(`http://localhost:8080/api/assets/update/${editAsset.id}`, editAsset, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      await axios.put(
+        `http://localhost:8080/api/assets/update/${updatedAsset.id}`,
+        updatedAsset,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
       setEditModalOpen(false);
       fetchAssets();
     } catch (error) {
@@ -114,7 +112,9 @@ function Assets() {
   return (
     <div className="container mt-4">
       <div className="d-flex justify-content-between align-items-center mb-3">
-        <h2 className="fw-bold" style={{ color: "#005DAA" }}>Assets</h2>
+        <h2 className="fw-bold" style={{ color: "#005DAA" }}>
+          Assets
+        </h2>
         <div className="d-flex gap-2">
           <button
             className="btn rounded-pill"
@@ -139,14 +139,45 @@ function Assets() {
       <div className="row g-4">
         {assets.map((asset) => (
           <div key={asset.id} className="col-md-6 col-lg-4">
-            <div className="p-4 shadow rounded-4 h-100" style={{ backgroundColor: "#fff", borderLeft: "5px solid #005DAA" }}>
-              <h5 className="fw-bold mb-2" style={{ color: "#005DAA" }}>{asset.serialNumber}</h5>
-              <p className="text-muted mb-2" style={{ fontSize: "0.95rem" }}>{asset.specs}</p>
-              <p className="text-muted mb-2" style={{ fontSize: "0.95rem" }}>Eligilibility : {asset.eligibilityLevel}</p>
-              <span className={`badge px-3 py-2 rounded-pill ${asset.status === "available" ? "bg-success" : "bg-secondary"}`}>{asset.status}</span>
+            <div
+              className="p-4 shadow rounded-4 h-100"
+              style={{
+                backgroundColor: "#fff",
+                borderLeft: "5px solid #005DAA",
+              }}
+            >
+              <h5 className="fw-bold mb-2" style={{ color: "#005DAA" }}>
+                {asset.serialNumber}
+              </h5>
+              <p className="text-muted mb-2" style={{ fontSize: "0.95rem" }}>
+                {asset.specs}
+              </p>
+              <p className="text-muted mb-2" style={{ fontSize: "0.95rem" }}>
+                Eligilibility : {asset.eligibilityLevel}
+              </p>
+              <span
+                className={`badge px-3 py-2 rounded-pill ${
+                  asset.status === "available" ? "bg-success" : "bg-secondary"
+                }`}
+              >
+                {asset.status}
+              </span>
               <div className="mt-3 d-flex gap-2">
-                <button className="btn btn-outline-primary btn-sm rounded-pill" onClick={() => { setEditAsset(asset); setEditModalOpen(true); }}>Edit</button>
-                <button className="btn btn-outline-danger btn-sm rounded-pill" onClick={() => handleDeleteAsset(asset.id)}>Delete</button>
+                <button
+                  className="btn btn-outline-primary btn-sm rounded-pill"
+                  onClick={() => {
+                    setEditAsset(asset);
+                    setEditModalOpen(true);
+                  }}
+                >
+                  Edit
+                </button>
+                <button
+                  className="btn btn-outline-danger btn-sm rounded-pill"
+                  onClick={() => handleDeleteAsset(asset.id)}
+                >
+                  Delete
+                </button>
               </div>
             </div>
           </div>
@@ -157,8 +188,6 @@ function Assets() {
         show={showModal}
         onClose={() => setShowModal(false)}
         onSave={handleAddAsset}
-        formData={formData}
-        setFormData={setFormData}
         categories={categories}
       />
 
@@ -174,8 +203,9 @@ function Assets() {
         show={editModalOpen}
         onClose={() => setEditModalOpen(false)}
         asset={editAsset}
-        setAsset={setEditAsset}
-        onUpdate={handleUpdateAsset}
+        onUpdate={(updatedAsset) => {
+          handleUpdateAsset(updatedAsset);
+        }}
       />
     </div>
   );

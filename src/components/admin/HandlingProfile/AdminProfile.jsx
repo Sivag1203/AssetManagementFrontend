@@ -34,11 +34,15 @@ function AdminProfile() {
     formData.append("file", file);
 
     try {
-      await axios.post("http://localhost:8080/api/profile-pic/upload", formData, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
+      await axios.post(
+        "http://localhost:8080/api/profile-pic/upload",
+        formData,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
       setMsg("Profile image uploaded...");
       getProfilePic();
     } catch (err) {
@@ -53,7 +57,6 @@ function AdminProfile() {
         <h4 className="fw-bold mb-4 text-center" style={{ color: "#005DAA" }}>
           Profile
         </h4>
-
         <div className="text-center mb-4">
           <img
             src={profilePic ? `/images/${profilePic}` : "/default-profile.png"}
@@ -69,7 +72,6 @@ function AdminProfile() {
           />
           <small className="text-success">{msg}</small>
         </div>
-
         {editMode ? (
           <EditAdminProfile
             user={user}
@@ -79,13 +81,55 @@ function AdminProfile() {
           />
         ) : (
           <>
-            <InfoField label="Name" value={user.name} />
-            <InfoField label="Email" value={user.email} />
-            <InfoField label="Phone" value={user.phone} />
-            <InfoField label="Department" value={user.department} />
-            <InfoField label="Address" value={user.address} />
-            <InfoField label="Login Email" value={user.email} />
-            <InfoField label="Role" value={user.role} />
+            {/* 👉  print the fields directly */}
+            <div className="mb-3">
+              <label className="form-label">Name</label>
+              <div className="border rounded px-3 py-2 bg-light">
+                {user.name}
+              </div>
+            </div>
+
+            <div className="mb-3">
+              <label className="form-label">Email</label>
+              <div className="border rounded px-3 py-2 bg-light">
+                {user.email}
+              </div>
+            </div>
+
+            <div className="mb-3">
+              <label className="form-label">Phone</label>
+              <div className="border rounded px-3 py-2 bg-light">
+                {user.phone}
+              </div>
+            </div>
+
+            <div className="mb-3">
+              <label className="form-label">Department</label>
+              <div className="border rounded px-3 py-2 bg-light">
+                {user.department}
+              </div>
+            </div>
+
+            <div className="mb-3">
+              <label className="form-label">Address</label>
+              <div className="border rounded px-3 py-2 bg-light">
+                {user.address}
+              </div>
+            </div>
+
+            <div className="mb-3">
+              <label className="form-label">Login Email</label>
+              <div className="border rounded px-3 py-2 bg-light">
+                {user.email}
+              </div>
+            </div>
+
+            <div className="mb-3">
+              <label className="form-label">Role</label>
+              <div className="border rounded px-3 py-2 bg-light">
+                {user.role}
+              </div>
+            </div>
 
             <div className="d-flex justify-content-end mt-4">
               <button
@@ -99,15 +143,6 @@ function AdminProfile() {
           </>
         )}
       </div>
-    </div>
-  );
-}
-
-function InfoField({ label, value }) {
-  return (
-    <div className="mb-3">
-      <label className="form-label">{label}</label>
-      <div className="border rounded px-3 py-2 bg-light">{value}</div>
     </div>
   );
 }

@@ -2,10 +2,10 @@ import { useEffect, useState } from "react";
 import axios from "axios";
 
 function EmployeeAuditSubmission() {
-  const [audits, setAudits] = useState([]); // all audits for this user
-  const [active, setActive] = useState(null); // audit now being filled
-  const [state, setState] = useState("working"); // dropdown value
-  const [comment, setComment] = useState(""); // textarea value
+  const [audits, setAudits] = useState([]); 
+  const [active, setActive] = useState(null);
+  const [state, setState] = useState("working");
+  const [comment, setComment] = useState("");
   const token = localStorage.getItem("token");
   useEffect(() => {
     (async () => {
@@ -20,7 +20,7 @@ function EmployeeAuditSubmission() {
           { headers: { Authorization: `Bearer ${token}` } }
         );
 
-        setAudits(data); // store everything
+        setAudits(data);
       } catch (err) {
         console.error("Fetch error", err);
       }
@@ -111,8 +111,7 @@ function EmployeeAuditSubmission() {
               onChange={(e) => setState(e.target.value)}
             >
               <option value="working">Working</option>
-              <option value="damaged">Damaged</option>
-              <option value="not_working">Not Working</option>
+              <option value="needsrepair">Needs Repair</option>
             </select>
 
             <textarea

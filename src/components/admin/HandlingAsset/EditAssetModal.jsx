@@ -77,7 +77,7 @@ function EditAssetModal({ show, onClose, asset, onUpdate }) {
                 onChange={(e) => setStatus(e.target.value)}
               >
                 <option value="available">Available</option>
-                <option value="not-available">Not Available</option>
+                <option value="not_available">Not Available</option>
               </select>
             </div>
           </div>
